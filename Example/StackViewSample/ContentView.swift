@@ -9,6 +9,9 @@
 import SwiftUI
 
 struct ContentView: View {
+    /// One store for both screens, so a movie added on either shows up on both.
+    @StateObject private var store = MovieStore()
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
@@ -37,8 +40,9 @@ struct ContentView: View {
             .padding(24)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .background(Color(white: 0.95).ignoresSafeArea())
-            .navigationTitle("StackView SDK Sample")
+            .navigationTitle("Movie Cards")
         }
+        .environmentObject(store)
     }
 }
 

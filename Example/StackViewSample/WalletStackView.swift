@@ -14,10 +14,10 @@ import StackView
 
 struct WalletStackView: UIViewRepresentable {
 
-    let items: [SampleItem]
+    let movies: [Movie]
     let useSwiftUICards: Bool
     let cardHeight: CGFloat
-    let onSelect: (SampleItem) -> Void
+    let onSelect: (Movie) -> Void
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
@@ -53,18 +53,21 @@ struct WalletStackView: UIViewRepresentable {
         guard let wallet = context.coordinator.wallet else { return }
         wallet.preferableCardViewHeight = cardHeight
 
-        let signature = "\(useSwiftUICards)|\(cardHeight)|" + items.map { $0.id.uuidString }.joined()
+        // Changing the filter (or adding a movie) changes this signature, which
+        // rebuilds the cards. `reload` drops the presented card when it is no
+        // longer in the set, so the stack falls back to the fan.
+        let signature = "\(useSwiftUICards)|\(cardHeight)|" + movies.map { $0.id.uuidString }.joined()
         guard context.coordinator.signature != signature else { return }
         context.coordinator.signature = signature
 
-        let cards: [CardView] = items.map { item in
+        let cards: [CardView] = movies.map { movie in
             if useSwiftUICards {
-                let card = SelectableSwiftUICard(item: item)
-                card.onSelect = { onSelect(item) }
+                let card = SelectableSwiftUICard(movie: movie)
+                card.onSelect = { onSelect(movie) }
                 return card
             } else {
-                let card = SampleUIKitCard(item: item)
-                card.onSelect = { onSelect(item) }
+                let card = MovieUIKitCard(movie: movie)
+                card.onSelect = { onSelect(movie) }
                 return card
             }
         }

@@ -8,41 +8,41 @@
 import SwiftUI
 
 struct DetailView: View {
-    let item: SampleItem
+    let movie: Movie
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color(rgb: item.hex))
+                    .fill(Color(rgb: movie.genre.hex))
                     .frame(height: 200)
                     .overlay(alignment: .bottomLeading) {
                         VStack(alignment: .leading, spacing: 6) {
-                            Text(item.title)
+                            Text(movie.title)
                                 .font(.title2.bold())
                                 .foregroundColor(.white)
-                            Text(item.subtitle)
+                            Text(movie.genre.displayName)
                                 .foregroundColor(.white.opacity(0.85))
                         }
                         .padding(20)
                     }
 
-                Text("Card details")
+                Text("Movie details")
                     .font(.headline)
 
                 VStack(spacing: 0) {
-                    detailRow("Name", item.title)
+                    detailRow("Name", movie.title)
                     Divider()
-                    detailRow("Issuer", item.subtitle)
+                    detailRow("Genre", movie.genre.displayName)
                     Divider()
-                    detailRow("Status", "Active")
+                    detailRow("Date of release", movie.releaseText)
                 }
                 .background(Color(UIColor.secondarySystemBackground))
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
             .padding(16)
         }
-        .navigationTitle(item.title)
+        .navigationTitle(movie.title)
         .navigationBarTitleDisplayMode(.inline)
     }
 
