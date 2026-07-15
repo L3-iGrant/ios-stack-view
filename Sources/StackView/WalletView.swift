@@ -234,6 +234,24 @@ open class WalletView: UIView {
     }
     
     func insert(cardViews: [CardView]) {
+        // Card views dropped by this reload are still subviews of the scroll
+        // view, and placeVisibleCardViews() only ever visits the new set — so
+        // without this they linger at their old frames behind the reloaded
+        // stack. Cards mid-removal-animation live in a temporary superview
+        // rather than the scroll view; leave those for the animation to clean
+        // up.
+        for cardView in insertedCardViews
+        where !cardViews.contains(cardView) && cardView.superview === scrollView {
+            cardView.removeFromSuperview()
+        }
+
+        // Dropping the presented card without clearing this leaves the wallet
+        // stuck in a presented state around a card that is no longer stacked,
+        // which blocks the next present() and grab().
+        if let presented = presentedCardView, !cardViews.contains(presented) {
+            presentedCardView = nil
+        }
+
         self.insertedCardViews = cardViews
         if insertedCardViews.count == 1 {
             presentedCardView = insertedCardViews.first
