@@ -14,12 +14,30 @@
 import SwiftUI
 import UIKit
 
+/// Wraps the card's content so the hosting controller lays it out against the
+/// card's full bounds. A card that reaches into the home-indicator area would
+/// otherwise inherit the window's bottom safe-area inset, and content sized or
+/// aligned against that reduced area drifts out of step with the cards above it.
+private struct FullBleed<Content: View>: View {
+    let content: Content
+    var body: some View { content.ignoresSafeArea() }
+}
+
 open class SwiftUICardView<Content: View>: CardView {
 
-    private let hostingController: UIHostingController<Content>
+    private let hostingController: UIHostingController<FullBleed<Content>>
 
     public init(rootView: Content) {
-        hostingController = UIHostingController(rootView: rootView)
+        hostingController = UIHostingController(rootView: FullBleed(content: rootView))
+        // The hosting controller is added as a child view controller (see
+        // didMoveToWindow), so it insets its root layout by the safe area it
+        // inherits from its parent. A card overlapping the home indicator then
+        // lays its content out in a shorter box and the content drifts up by
+        // half the inset, out of step with the cards above it. ignoresSafeArea()
+        // on the content only governs how it extends, not this inset.
+        if #available(iOS 16.4, *) {
+            hostingController.safeAreaRegions = []
+        }
         super.init(frame: .zero)
         backgroundColor = .clear
         hostingController.view.backgroundColor = .clear
@@ -39,7 +57,7 @@ open class SwiftUICardView<Content: View>: CardView {
 
     /// Swap the SwiftUI content without rebuilding the card.
     public func update(rootView: Content) {
-        hostingController.rootView = rootView
+        hostingController.rootView = FullBleed(content: rootView)
     }
 
     /// Attach the hosting controller to the nearest view controller once in the
